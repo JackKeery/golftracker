@@ -1,5 +1,18 @@
 package kotlin.com.jwk.golftracker
 
+import com.tangledwebgames.repo.RepositoryProvider.scoreRepository
+import com.tangledwebgames.repo.User
+import io.ktor.http.*
+import io.ktor.http.HttpMethod.Companion.Post
+import io.ktor.http.HttpStatusCode.Companion.OK
+import io.ktor.server.testing.*
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json.Default.decodeFromString
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+import kotlin.random.Random.Default.nextInt
+
 class ApplicationTest {
     companion object {
         private const val USER_NAME_0 = "Louis"
@@ -13,15 +26,14 @@ class ApplicationTest {
             "User $it"
         }
         private val TOP_SCORES_TEST_USER_SCORES = List(50) {
-            Random.nextInt(0, 50).toLong()
+            nextInt(0, 50).toLong()
         }
         private val TOP_SCORES_TEST_USER_SCORES_SORTED = TOP_SCORES_TEST_USER_SCORES.sortedDescending()
     }
 
-    private val repo
-        get() = RepositoryProvider.scoreRepository
+    private val repo = scoreRepository
 
-    @After
+    @AfterEach
     fun cleanup() {
         runBlocking {
             repo.clear()
@@ -252,11 +264,8 @@ class ApplicationTest {
 
     private fun TestApplicationEngine.getValidUser(expectedUser: User) {
         getUser(expectedUser.id.toString()) {
-            assertStatus(HttpStatusCode.OK)
-            assertEquals(
-                expectedUser,
-                Json.decodeFromString<User>(response.content ?: "{}")
-            )
+            assertStatus(OK)
+            assertEquals(expectedUser, decodeFromString<User>(response.content ?: "{}"))
         }
     }
 
@@ -273,21 +282,21 @@ class ApplicationTest {
     }
 
     private fun TestApplicationEngine.newUser(name: String) {
-        handleRequest(HttpMethod.Post, uri="/newUser?name=$name").apply {
-            assertStatus(HttpStatusCode.OK)
+        handleRequest(Post, uri="/newUser?name=$name").apply {
+            assertStatus(OK)
             try {
-                val newUser = Json.decodeFromString<User>(response.content ?: "{}")
+                val newUser = decodeFromString<User>(response.content ?: "{}")
                 assertEquals(name, newUser.name)
                 assertEquals(0, newUser.highScore)
-            } catch (e: JsonException) {
-                Assert.fail(e.message)
+            } catch (e: Exception) {
+                fail(e.message)
             }
         }
     }
 
     private fun TestApplicationEngine.newUserNoName() {
-        handleRequest(HttpMethod.Post, uri="/newUser").apply {
-            assertFalse(requestHandled)
+        handleRequest(Post, uri="/newUser").apply {
+            assertFalse(response.isSent)
         }
     }
 
@@ -306,7 +315,7 @@ class ApplicationTest {
         } else {
             ""
         }
-        handleRequest(HttpMethod.Post, uri).apply(testBlock)
+        handleRequest(Post, uri).apply(testBlock)
     }
 
     private fun TestApplicationEngine.updateValidUser(userId: Long, name: String? = null, score: Long? = null) {
@@ -314,9 +323,9 @@ class ApplicationTest {
             throw(IllegalArgumentException("For valid update user test, at least one of name and score must be present."))
         }
         updateUser(userId.toString(), name, score?.toString()) {
-            assertStatus(HttpStatusCode.OK)
+            assertStatus(OK)
             try {
-                val responseUser = Json.decodeFromString<User>(response.content ?: "{}")
+                val responseUser = decodeFromString<User>(response.content ?: "{}")
                 assertEquals(userId, responseUser.id)
                 name?.let {
                     assertEquals(it, responseUser.name)
@@ -324,8 +333,8 @@ class ApplicationTest {
                 score?.let {
                     assertEquals(it, responseUser.highScore)
                 }
-            } catch (e: JsonException) {
-                Assert.fail(e.message)
+            } catch (e: Exception) {
+                fail(e.message)
             }
         }
     }
@@ -350,7 +359,7 @@ class ApplicationTest {
 
     private fun TestApplicationEngine.updateUserInvalidUserId(userId: String, name: String? = null, score: Long? = null) {
         updateUser(userId, name, score?.toString()) {
-            assertStatus(HttpStatusCode.OK)
+            assertStatus(OK)
             assertEquals("userId must be a valid long", response.content)
         }
     }
@@ -361,25 +370,25 @@ class ApplicationTest {
         testBlock: TestApplicationCall.() -> Unit
     ) {
         val uri = "/user/$userId/newScore" + if (score != null) { "?score=$score" } else { "" }
-        handleRequest(HttpMethod.Post, uri).apply(testBlock)
+        handleRequest(Post, uri).apply(testBlock)
     }
 
     private fun TestApplicationEngine.newScoreValidUser(userId: Long, newScore: Long, expectedScore: Long) {
         newScore(userId.toString(), newScore.toString()) {
-            assertStatus(HttpStatusCode.OK)
+            assertStatus(OK)
             try {
-                val returnedUser = Json.decodeFromString<User>(response.content ?: "")
+                val returnedUser = decodeFromString<User>(response.content ?: "")
                 assertEquals(userId, returnedUser.id)
                 assertEquals(expectedScore, returnedUser.highScore)
-            } catch (e: JsonException) {
-                Assert.fail(e.message)
+            } catch (e: Exception) {
+                fail(e.message)
             }
         }
     }
 
     private fun TestApplicationEngine.newScoreInvalidScore(userId: Long, newScore: String) {
         newScore(userId.toString(), newScore) {
-            assertStatus(HttpStatusCode.OK)
+            assertStatus(OK)
             assertEquals(
                 "Must include query parameter score with valid long value",
                 response.content
@@ -389,7 +398,7 @@ class ApplicationTest {
 
     private fun TestApplicationEngine.newScoreNoParam(userId: Long) {
         newScore(userId.toString()) {
-            assertFalse(requestHandled)
+            assertFalse(response.isSent)
         }
     }
 
@@ -408,10 +417,10 @@ class ApplicationTest {
     private fun TestApplicationEngine.getTopScorers(count: String? = null, expectedScoreList: List<Long>) {
         val uri = "/topScores" + if (count != null) { "?count=$count" } else { "" }
         handleRequest(HttpMethod.Get, uri).apply {
-            assertStatus(HttpStatusCode.OK)
+            assertStatus(OK)
             assertEquals(
                 expectedScoreList,
-                Json.decodeFromString<List<User>>(response.content ?: "{}")
+                decodeFromString<List<User>>(response.content ?: "{}")
                     .map { it.highScore }
                     .sortedDescending()
             )
@@ -419,17 +428,17 @@ class ApplicationTest {
     }
 
     private fun TestApplicationCall.userNotFound(userId: String) {
-        assertStatus(HttpStatusCode.OK)
+        assertStatus(OK)
         assertEquals("No user found with ID $userId", response.content)
     }
 
     private fun TestApplicationCall.invalidUserId() {
-        assertStatus(HttpStatusCode.OK)
+        assertStatus(OK)
         assertEquals("userId must be a valid long", response.content)
     }
 
     private fun TestApplicationCall.invalidUpdateQueryParameters() {
-        assertStatus(HttpStatusCode.OK)
+        assertStatus(OK)
         assertEquals(
             "At least one of query parameters name and score must be provided. score must be a valid long",
             response.content

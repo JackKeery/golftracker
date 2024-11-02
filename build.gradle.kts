@@ -15,8 +15,14 @@ dependencies {
 
     implementation("io.ktor:ktor-server-core:${property("ktor_version")}")
     implementation("io.ktor:ktor-server-netty:${property("ktor_version")}")
+    implementation("io.ktor:ktor-server-tests:${property("ktor_version")}") {
+        exclude(module = "junit")
+    }
 
     implementation("ch.qos.logback:logback-classic:${property("logback_version")}")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.2")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

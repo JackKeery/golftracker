@@ -9,7 +9,7 @@ import com.tangledwebgames.routes.Resolvers.getUser
 import com.tangledwebgames.routes.Resolvers.newUser
 import com.tangledwebgames.routes.Resolvers.postUserScore
 import com.tangledwebgames.routes.Resolvers.updateUser
-import io.ktor.routing.*
+import io.ktor.server.routing.*
 
 fun Routing.routingMain() {
     route("/user/{$USER_ID}") {

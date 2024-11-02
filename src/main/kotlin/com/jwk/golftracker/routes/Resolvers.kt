@@ -8,9 +8,9 @@ import com.tangledwebgames.routes.ParamKeys.COUNT
 import com.tangledwebgames.routes.ParamKeys.NAME
 import com.tangledwebgames.routes.ParamKeys.SCORE
 import com.tangledwebgames.routes.ParamKeys.USER_ID
-import io.ktor.application.*
-import io.ktor.http.*
-import io.ktor.response.*
+import io.ktor.http.HttpStatusCode.Companion.OK
+import io.ktor.server.application.*
+import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 
 internal typealias Context = PipelineContext<Unit, ApplicationCall>
@@ -24,14 +24,14 @@ internal object Resolvers {
     val getUser: RequestResolver = {
         call.parameters[USER_ID]?.toLongOrNull()?.let { id ->
             repo.getUser(id)?.let {
-                call.respond(HttpStatusCode.OK, it)
+                call.respond(OK, it)
             } ?: userNotFound(id)
         } ?: invalidUserId()
     }
 
     val newUser: RequestResolver = {
         call.parameters[NAME]?.let { newUserName ->
-            call.respond(HttpStatusCode.OK, repo.addUser(newUserName))
+            call.respond(OK, repo.addUser(newUserName))
         }
     }
 
@@ -61,7 +61,7 @@ internal object Resolvers {
                 repo.setScore(id, it)
             }
             repo.getUser(id)?.let {
-                call.respond(HttpStatusCode.OK, it)
+                call.respond(OK, it)
             }
         } ?: invalidUserId()
     }
@@ -71,7 +71,7 @@ internal object Resolvers {
             call.parameters[SCORE]?.toLongOrNull()?.let { score ->
                 if (repo.hasUser(userId)) {
                     repo.newScore(userId, score)
-                    call.respond(HttpStatusCode.OK, requireNotNull(repo.getUser(userId)))
+                    call.respond(OK, requireNotNull(repo.getUser(userId)))
                 } else {
                     userNotFound(userId)
                 }
@@ -83,7 +83,7 @@ internal object Resolvers {
         val topScorers = call.parameters[COUNT]?.toIntOrNull()?.let {
             repo.getTopScores(it)
         } ?: repo.getTopScores()
-        call.respond(HttpStatusCode.OK, topScorers)
+        call.respond(OK, topScorers)
     }
 
 }

@@ -1,15 +1,15 @@
 package com.tangledwebgames.routes
 
-import io.ktor.application.*
-import io.ktor.http.*
-import io.ktor.response.*
+import io.ktor.http.HttpStatusCode.Companion.OK
+import io.ktor.server.application.*
+import io.ktor.server.response.*
 
 internal object Errors {
 
     suspend fun Context.textError(text: String) {
         call.respondText(
             text = text,
-            status = HttpStatusCode.OK
+            status = OK
         )
     }
 
