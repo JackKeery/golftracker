@@ -1,2 +1,2 @@
-rootProject.name = "leaderboard-master"
+rootProject.name = "golftracker"
 
