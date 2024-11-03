@@ -1,4 +1,4 @@
-package com.tangledwebgames.repo
+package com.jwk.golftracker.repo
 
 /**
  * An interface for a database which holds user & score data.

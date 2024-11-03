@@ -1,4 +1,4 @@
-package com.tangledwebgames.routes
+package com.jwk.golftracker.routes
 
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.server.application.*

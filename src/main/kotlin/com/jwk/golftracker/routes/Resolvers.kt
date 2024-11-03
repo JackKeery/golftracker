@@ -1,13 +1,13 @@
-package com.tangledwebgames.routes
+package com.jwk.golftracker.routes
 
-import com.tangledwebgames.repo.RepositoryProvider
-import com.tangledwebgames.routes.Errors.invalidUserId
-import com.tangledwebgames.routes.Errors.textError
-import com.tangledwebgames.routes.Errors.userNotFound
-import com.tangledwebgames.routes.ParamKeys.COUNT
-import com.tangledwebgames.routes.ParamKeys.NAME
-import com.tangledwebgames.routes.ParamKeys.SCORE
-import com.tangledwebgames.routes.ParamKeys.USER_ID
+import com.jwk.golftracker.repo.RepositoryProvider.scoreRepository
+import com.jwk.golftracker.routes.Errors.invalidUserId
+import com.jwk.golftracker.routes.Errors.textError
+import com.jwk.golftracker.routes.Errors.userNotFound
+import com.jwk.golftracker.routes.ParamKeys.COUNT
+import com.jwk.golftracker.routes.ParamKeys.NAME
+import com.jwk.golftracker.routes.ParamKeys.SCORE
+import com.jwk.golftracker.routes.ParamKeys.USER_ID
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -18,8 +18,7 @@ internal typealias RequestResolver = suspend Context.() -> Unit
 
 internal object Resolvers {
 
-    private val repo
-        get() = RepositoryProvider.scoreRepository
+    private val repo = scoreRepository
 
     val getUser: RequestResolver = {
         call.parameters[USER_ID]?.toLongOrNull()?.let { id ->

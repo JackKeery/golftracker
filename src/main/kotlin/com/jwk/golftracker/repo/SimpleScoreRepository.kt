@@ -1,4 +1,4 @@
-package com.tangledwebgames.repo
+package com.jwk.golftracker.repo
 
 /**
  * Basic implementation of [ScoreRepository] interface which holds an array of users in memory.

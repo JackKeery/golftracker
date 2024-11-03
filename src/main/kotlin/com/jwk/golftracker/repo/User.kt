@@ -1,4 +1,4 @@
-package com.tangledwebgames.repo
+package com.jwk.golftracker.repo
 
 import kotlinx.serialization.Serializable
 

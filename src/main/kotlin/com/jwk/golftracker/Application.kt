@@ -1,4 +1,4 @@
-package com.tangledwebgames
+package
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.tangledwebgames.repo.RepositoryProvider

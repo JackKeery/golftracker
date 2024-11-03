@@ -1,4 +1,4 @@
-package com.tangledwebgames.routes
+package com.jwk.golftracker.routes
 
 internal object ParamKeys {
     const val USER_ID = "userId"

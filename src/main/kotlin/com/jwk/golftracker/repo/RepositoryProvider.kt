@@ -1,4 +1,4 @@
-package com.tangledwebgames.repo
+package com.jwk.golftracker.repo
 
 object RepositoryProvider {
     var isTest: Boolean = false

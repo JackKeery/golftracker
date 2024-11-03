@@ -1,4 +1,4 @@
-package com.tangledwebgames.routes
+package com.jwk.golftracker.routes
 
 import com.tangledwebgames.routes.ParamKeys.COUNT
 import com.tangledwebgames.routes.ParamKeys.NAME
